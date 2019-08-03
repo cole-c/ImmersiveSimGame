@@ -34,11 +34,6 @@ public class CapsuleCharacter : MonoBehaviour
         transform.position += movementDirection.normalized * moveSpeed * Time.deltaTime;
 
         //Keep camera at player's back
-        //if (movementDirection != Vector3.zero)
-        //{
-        //    transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(movementDirection), rotationSpeed * Time.deltaTime);
-        //}
-
         transform.rotation = Quaternion.Euler(0, cameraTransform.eulerAngles.y, 0);
     }
 

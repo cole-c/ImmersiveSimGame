@@ -1,0 +1,75 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+[RequireComponent(typeof(LineRenderer))]
+public class ThrowArcRenderer : MonoBehaviour
+{
+    LineRenderer line;
+
+    private GameObject player;
+
+    public float v;
+    public float angle;
+    public int lineSegs;
+
+    float g;
+    float radAngle;
+
+    private void Awake()
+    {
+        player = GameObject.FindGameObjectWithTag("Player");
+
+        line = GetComponent<LineRenderer>();
+        g = Mathf.Abs(Physics.gravity.y);
+    }
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        line.useWorldSpace = false;
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        if (line != null)
+        {
+            RenderArc();
+        }
+    }
+
+    void RenderArc()
+    {
+        line.positionCount = lineSegs + 1;
+        line.SetPositions(CalculateArcArray());
+    }
+
+    Vector3[] CalculateArcArray()
+    {
+        Vector3[] arcArray = new Vector3[lineSegs + 1];
+
+        radAngle = Mathf.Deg2Rad * angle;
+        float maxDistance = (v * v * Mathf.Sin(2 * radAngle)) / g;
+
+        for(int i = 0; i <= lineSegs; i++)
+        {
+            float t = (float)i / (float)lineSegs;
+            arcArray[i] = CalculateArcPoint(t, maxDistance);
+        }
+
+        return arcArray;
+    }
+
+    Vector3 CalculateArcPoint(float t, float maxDistance)
+    {
+        float z = t * maxDistance;
+        float y = z * Mathf.Tan(radAngle) - ((g * z * z) / (2 * v * v * Mathf.Cos(radAngle) * Mathf.Cos(radAngle)));
+        return new Vector3(0, y, z);
+        //return new Vector3(x + player.transform.position.x, y + player.transform.position.y, 0 + player.transform.position.z);
+    }
+
+    //How to apply a force to a rigid body to make it follow this parabola
+    //GetComponent<Rigidbody>().velocity = transform.TransformDirection(0, velocity * Mathf.Sqrt(2) / 2, velocity * Mathf.Sqrt(2) / 2);
+
+}
