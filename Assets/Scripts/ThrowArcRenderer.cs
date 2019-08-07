@@ -8,6 +8,7 @@ public class ThrowArcRenderer : MonoBehaviour
     LineRenderer line;
 
     private GameObject player;
+    private CameraScript camera;
 
     public float v;
     public float angle;
@@ -19,6 +20,7 @@ public class ThrowArcRenderer : MonoBehaviour
     private void Awake()
     {
         player = GameObject.FindGameObjectWithTag("Player");
+        camera = (CameraScript) GameObject.FindGameObjectWithTag("MainCamera").GetComponent(typeof(CameraScript));
 
         line = GetComponent<LineRenderer>();
         g = Mathf.Abs(Physics.gravity.y);
@@ -28,6 +30,9 @@ public class ThrowArcRenderer : MonoBehaviour
     void Start()
     {
         line.useWorldSpace = false;
+        v = 10;
+        angle = 45;
+        lineSegs = 20;
     }
 
     // Update is called once per frame
@@ -37,6 +42,9 @@ public class ThrowArcRenderer : MonoBehaviour
         {
             RenderArc();
         }
+
+        //Currently with camHeight min:25 and max:50 this will go between 2.5 and 10
+        v = (camera.getCamHeight() * camera.getCamHeight()) / 250;
     }
 
     void RenderArc()
