@@ -17,6 +17,9 @@ public class ThrowArcRenderer : MonoBehaviour
     float g;
     float radAngle;
 
+    GameObject hand;
+    GameObject heldObject;
+
     private void Awake()
     {
         player = GameObject.FindGameObjectWithTag("Player");
@@ -24,6 +27,8 @@ public class ThrowArcRenderer : MonoBehaviour
 
         line = GetComponent<LineRenderer>();
         g = Mathf.Abs(Physics.gravity.y);
+
+        hand = GameObject.Find("Hand");
     }
 
     // Start is called before the first frame update
@@ -45,6 +50,33 @@ public class ThrowArcRenderer : MonoBehaviour
 
         //Currently with camHeight min:25 and max:50 this will go between 2.5 and 10
         v = (camera.getCamHeight() * camera.getCamHeight()) / 250;
+
+        //Logic for picking up and throwing objects
+        Collider[] objects = Physics.OverlapSphere(hand.transform.position, 1);
+
+        for(int i=0; i<objects.Length; i++)
+        {
+            if(objects[i].tag == "throwable")
+            {
+                //TODO how to handle multiple objects being close, maybe sort distances here and highlight the closest?
+                if(Input.GetKeyDown(KeyCode.Space))
+                {
+                    heldObject = objects[i].gameObject;
+                }
+            }
+        }
+
+        if(heldObject != null)
+        {
+            heldObject.transform.parent = hand.transform;
+
+            if(Input.GetMouseButtonDown(0))
+            {
+                heldObject.transform.parent = null;
+                heldObject = null;
+            }
+        }
+        
     }
 
     void RenderArc()
