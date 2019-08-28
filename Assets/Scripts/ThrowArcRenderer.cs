@@ -62,6 +62,7 @@ public class ThrowArcRenderer : MonoBehaviour
                 if(Input.GetKeyDown(KeyCode.Space))
                 {
                     heldObject = objects[i].gameObject;
+                    heldObject.GetComponent<Rigidbody>().useGravity = false;
                 }
             }
         }
@@ -72,11 +73,23 @@ public class ThrowArcRenderer : MonoBehaviour
 
             if(Input.GetMouseButtonDown(0))
             {
-                heldObject.transform.parent = null;
-                heldObject = null;
+                dropObject();
+            }
+            else if(Input.GetKeyDown(KeyCode.F))
+            {
+                //Throw the object
+                heldObject.GetComponent<Rigidbody>().velocity = transform.TransformDirection(0, v * Mathf.Sqrt(2) / 2, v * Mathf.Sqrt(2) / 2);
+                dropObject();
             }
         }
         
+    }
+
+    void dropObject()
+    {
+        heldObject.GetComponent<Rigidbody>().useGravity = true;
+        heldObject.transform.parent = null;
+        heldObject = null;
     }
 
     void RenderArc()
@@ -106,10 +119,6 @@ public class ThrowArcRenderer : MonoBehaviour
         float z = t * maxDistance;
         float y = z * Mathf.Tan(radAngle) - ((g * z * z) / (2 * v * v * Mathf.Cos(radAngle) * Mathf.Cos(radAngle)));
         return new Vector3(0, y, z);
-        //return new Vector3(x + player.transform.position.x, y + player.transform.position.y, 0 + player.transform.position.z);
     }
-
-    //How to apply a force to a rigid body to make it follow this parabola
-    //GetComponent<Rigidbody>().velocity = transform.TransformDirection(0, velocity * Mathf.Sqrt(2) / 2, velocity * Mathf.Sqrt(2) / 2);
 
 }
