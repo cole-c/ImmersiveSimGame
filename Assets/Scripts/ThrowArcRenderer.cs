@@ -20,6 +20,9 @@ public class ThrowArcRenderer : MonoBehaviour
     GameObject hand;
     GameObject heldObject;
 
+    //Colors for linerenderer to fade out
+    Color clear = new Color(1, 1, 1, 0);
+
     private void Awake()
     {
         player = GameObject.FindGameObjectWithTag("Player");
@@ -38,6 +41,11 @@ public class ThrowArcRenderer : MonoBehaviour
         v = 10;
         angle = 45;
         lineSegs = 20;
+
+        //fade linerenderer at the end
+        line.startColor = Color.white;
+        line.endColor = clear;
+        line.material.color = Color.white;
     }
 
     // Update is called once per frame
@@ -62,14 +70,14 @@ public class ThrowArcRenderer : MonoBehaviour
                 if(Input.GetKeyDown(KeyCode.Space))
                 {
                     heldObject = objects[i].gameObject;
-                    heldObject.GetComponent<Rigidbody>().useGravity = false;
                 }
             }
         }
 
         if(heldObject != null)
         {
-            heldObject.transform.parent = hand.transform;
+
+            heldObject.transform.position = hand.transform.position;
 
             if(Input.GetMouseButtonDown(0))
             {
@@ -87,8 +95,6 @@ public class ThrowArcRenderer : MonoBehaviour
 
     void dropObject()
     {
-        heldObject.GetComponent<Rigidbody>().useGravity = true;
-        heldObject.transform.parent = null;
         heldObject = null;
     }
 
