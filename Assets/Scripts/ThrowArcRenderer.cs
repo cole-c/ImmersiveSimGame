@@ -7,8 +7,7 @@ public class ThrowArcRenderer : MonoBehaviour
 {
     LineRenderer line;
 
-    private GameObject player;
-    private CameraScript camera;
+    private CameraScript mainCamera;
 
     public float v;
     public float angle;
@@ -25,19 +24,22 @@ public class ThrowArcRenderer : MonoBehaviour
 
     private void Awake()
     {
-        player = GameObject.FindGameObjectWithTag("Player");
-        camera = (CameraScript) GameObject.FindGameObjectWithTag("MainCamera").GetComponent(typeof(CameraScript));
-
-        line = GetComponent<LineRenderer>();
-        g = Mathf.Abs(Physics.gravity.y);
-
+        //Find needed components
+        mainCamera = (CameraScript) GameObject.FindGameObjectWithTag("MainCamera").GetComponent(typeof(CameraScript));
         hand = GameObject.Find("Hand");
+        line = GetComponent<LineRenderer>();
+
+        //Physics Constants
+        g = Mathf.Abs(Physics.gravity.y);
     }
 
     // Start is called before the first frame update
     void Start()
     {
+      //Set up the line-renderer
+        //treats parent object's position as (0,0,0)
         line.useWorldSpace = false;
+        //default values for throwing, velocity, angle, and linesegments for linerenderer
         v = 10;
         angle = 45;
         lineSegs = 20;
@@ -51,42 +53,59 @@ public class ThrowArcRenderer : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (line != null)
+        //check that we have a line-renderer and something to throw
+        if (line != null && heldObject != null)
         {
-            RenderArc();
+            line.startColor = Color.white;
+        } else
+        {
+            //Hide the line renderer
+            line.startColor = clear;
         }
+        RenderArc();
 
-        //Currently with camHeight min:25 and max:50 this will go between 2.5 and 10
-        v = (camera.getCamHeight() * camera.getCamHeight()) / 250;
+        //Adjust throw based on camera height - currently with camHeight min:25 and max:50 this will go between 2.5 and 10
+        v = (mainCamera.getCamHeight() * mainCamera.getCamHeight()) / 250;
 
         //Logic for picking up and throwing objects
-        Collider[] objects = Physics.OverlapSphere(hand.transform.position, 1);
+        Collider[] objects = Physics.OverlapSphere(hand.transform.position, 2);
+
+        float distance = 10;
+        GameObject closestThing = null;
 
         for(int i=0; i<objects.Length; i++)
         {
             if(objects[i].tag == "throwable")
             {
-                //TODO how to handle multiple objects being close, maybe sort distances here and highlight the closest?
+
+                float tempDist = Vector3.Distance(objects[i].gameObject.transform.position, hand.transform.position);
+                //Find the closest object TODO later highlight or indicate this object over others
+                if (tempDist < distance)
+                {
+                    distance = tempDist;
+                    closestThing = objects[i].gameObject;
+                }
+                //Pick up the object
                 if(Input.GetKeyDown(KeyCode.Space))
                 {
-                    heldObject = objects[i].gameObject;
+                    heldObject = closestThing;
                 }
             }
         }
 
         if(heldObject != null)
         {
-
+            //"hold" the object in hand, arm must be not solid TODO sometimes spins?
             heldObject.transform.position = hand.transform.position;
 
             if(Input.GetMouseButtonDown(0))
             {
+                //Throw the object along the preview line
+                heldObject.GetComponent<Rigidbody>().velocity = transform.TransformDirection(0, v * Mathf.Sqrt(2) / 2, v * Mathf.Sqrt(2) / 2);
                 dropObject();
             }
             else if(Input.GetKeyDown(KeyCode.F))
             {
-                //Throw the object
-                heldObject.GetComponent<Rigidbody>().velocity = transform.TransformDirection(0, v * Mathf.Sqrt(2) / 2, v * Mathf.Sqrt(2) / 2);
                 dropObject();
             }
         }
